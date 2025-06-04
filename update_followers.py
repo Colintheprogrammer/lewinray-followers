@@ -41,8 +41,9 @@ def write_html_file(content):
     }}
     .followers {{
       font-family: 'Inter', sans-serif;
-      font-size: 4rem;
-      color: black;
+      font-size: 18px;
+      font-weight: bold;
+      color: #9FA2A5;
     }}
   </style>
 </head>
