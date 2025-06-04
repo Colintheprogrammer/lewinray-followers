@@ -108,7 +108,6 @@ def build_html(content, title):
       font-weight: bold;
       color: #9FA2A5;
       user-select: none;
-      cursor: default;
     }}
   </style>
 </head>
