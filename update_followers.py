@@ -1,48 +1,75 @@
 import os
 import requests
 
+# === KONFIGURATION ===
 RAPIDAPI_KEY = os.environ["RAPIDAPI_KEY"]
+
 TIKTOK_USER_ID = "56605052018139136"
 INSTAGRAM_PROFILE_URL = "https://www.instagram.com/lewinray/"
+TWITCH_USERNAME = "lewinray"
 
+# === HILFSMETHODEN ===
 def format_number_spaced(number):
     return f"{number:,}".replace(",", " ")
 
-def get_tiktok_followers_by_id(user_id):
+# === TIKTOK ===
+def get_tiktok_followers(user_id):
     url = "https://tiktok-scraper7.p.rapidapi.com/user/info"
-    querystring = {"user_id": user_id}
     headers = {
         "X-RapidAPI-Key": RAPIDAPI_KEY,
         "X-RapidAPI-Host": "tiktok-scraper7.p.rapidapi.com"
     }
-
-    response = requests.get(url, headers=headers, params=querystring)
+    params = {"user_id": user_id}
+    response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     data = response.json()
-
     return format_number_spaced(data["data"]["stats"]["followerCount"])
 
-def get_instagram_followers_by_url(profile_url):
+def write_tiktok_html(follower_count):
+    with open("tiktok.html", "w", encoding="utf-8") as f:
+        f.write(build_html(follower_count, "TikTok Followers"))
+
+# === INSTAGRAM ===
+def get_instagram_followers(profile_url):
     url = "https://instagram-statistics-api.p.rapidapi.com/community"
-    querystring = {"url": profile_url, "force": "true"}
     headers = {
         "X-RapidAPI-Key": RAPIDAPI_KEY,
         "X-RapidAPI-Host": "instagram-statistics-api.p.rapidapi.com"
     }
-
-    response = requests.get(url, headers=headers, params=querystring)
+    params = {"url": profile_url}
+    response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     data = response.json()
-
     return format_number_spaced(data["data"]["usersCount"])
 
-def write_html_file(filename, count):
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"""<!DOCTYPE html>
+def write_instagram_html(follower_count):
+    with open("instagram.html", "w", encoding="utf-8") as f:
+        f.write(build_html(follower_count, "Instagram Followers"))
+
+# === TWITCH ===
+def get_twitch_followers(username):
+    url = "https://twitch-scraper2.p.rapidapi.com/api/channels/info"
+    headers = {
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": "twitch-scraper2.p.rapidapi.com"
+    }
+    params = {"channel": username}
+    response = requests.get(url, headers=headers, params=params)
+    response.raise_for_status()
+    data = response.json()
+    return format_number_spaced(data["data"]["user"]["followers"]["totalCount"])
+
+def write_twitch_html(follower_count):
+    with open("twitch.html", "w", encoding="utf-8") as f:
+        f.write(build_html(follower_count, "Twitch Followers"))
+
+# === HTML TEMPLATE ===
+def build_html(content, title):
+    return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Followers</title>
+  <title>{title}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
     body {{
@@ -62,13 +89,18 @@ def write_html_file(filename, count):
   </style>
 </head>
 <body>
-  <div class="followers">{count}</div>
+  <div class="followers">{content}</div>
 </body>
-</html>""")
+</html>"""
 
+# === AUSFÜHRUNG ===
 if __name__ == "__main__":
-    tiktok = get_tiktok_followers_by_id(TIKTOK_USER_ID)
-    instagram = get_instagram_followers_by_url(INSTAGRAM_PROFILE_URL)
+    tt_followers = get_tiktok_followers(TIKTOK_USER_ID)
+    insta_followers = get_instagram_followers(INSTAGRAM_PROFILE_URL)
+    twitch_followers = get_twitch_followers(TWITCH_USERNAME)
 
-    write_html_file("tiktok.html", tiktok)
-    write_html_file("instagram.html", instagram)
+    write_tiktok_html(tt_followers)
+    write_instagram_html(insta_followers)
+    write_twitch_html(twitch_followers)
+
+    print("HTML-Dateien für TikTok, Instagram und Twitch wurden erstellt.")
