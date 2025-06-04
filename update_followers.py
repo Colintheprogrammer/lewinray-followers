@@ -33,7 +33,7 @@ def get_tiktok_followers_by_id(user_id):
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     data = response.json()
-    return format_number_spaced(data["data"]["follower_count"])
+    return format_number_spaced(data["data"]["followers"][0]["follower_count"])
 
 # --------------------
 # HTML-Datei erstellen
