@@ -36,8 +36,8 @@ def get_instagram_followers_by_url(profile_url):
 
     return format_number_spaced(data["data"]["usersCount"])
 
-def write_html_file(tiktok_count, insta_count):
-    with open("followers.html", "w", encoding="utf-8") as f:
+def write_html_file(tiktok_count):
+    with open("tiktok.html", "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,11 +64,41 @@ def write_html_file(tiktok_count, insta_count):
 </head>
 <body>
   <div class="followers">{tiktok_count}</div>
-  <div class="followers">{insta_count}</div>
+</body>
+</html>""")
+
+def write_html_file(instagram_count):
+    with open("instagram.html", "w", encoding="utf-8") as f:
+        f.write(f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Followers</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
+    body {{
+      margin: 0;
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 80px;
+    }}
+    .followers {{
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      color: #9FA2A5;
+    }}
+  </style>
+</head>
+<body>
+  <div class="followers">{instagram_count}</div>
 </body>
 </html>""")
 
 if __name__ == "__main__":
     tiktok = get_tiktok_followers_by_id(TIKTOK_USER_ID)
-    insta = get_instagram_followers_by_url(INSTAGRAM_PROFILE_URL)
-    write_html_file(tiktok, insta)
+    instagram = get_instagram_followers_by_url(INSTAGRAM_PROFILE_URL)
+    write_html_file(tiktok, instagram)
