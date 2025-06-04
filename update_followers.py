@@ -1,10 +1,9 @@
 import os
 import requests
-from datetime import datetime
 
 RAPIDAPI_KEY = os.environ["RAPIDAPI_KEY"]
 TIKTOK_USER_ID = "56605052018139136"
-INSTAGRAM_USERNAME = "lewinray"
+INSTAGRAM_PROFILE_URL = "https://www.instagram.com/lewinray/"
 
 def format_number_spaced(number):
     return f"{number:,}".replace(",", " ")
@@ -16,21 +15,25 @@ def get_tiktok_followers_by_id(user_id):
         "X-RapidAPI-Key": RAPIDAPI_KEY,
         "X-RapidAPI-Host": "tiktok-scraper7.p.rapidapi.com"
     }
+
     response = requests.get(url, headers=headers, params=querystring)
     response.raise_for_status()
     data = response.json()
+
     return format_number_spaced(data["data"]["stats"]["followerCount"])
 
-def get_instagram_followers_by_username(username):
-    url = "https://instagram-statistics-api.p.rapidapi.com/profile"
-    querystring = {"url": f"https://www.instagram.com/{username}/"}
+def get_instagram_followers_by_url(profile_url):
+    url = "https://instagram-statistics-api.p.rapidapi.com/community"
+    querystring = {"url": profile_url, "force": "true"}
     headers = {
         "X-RapidAPI-Key": RAPIDAPI_KEY,
         "X-RapidAPI-Host": "instagram-statistics-api.p.rapidapi.com"
     }
+
     response = requests.get(url, headers=headers, params=querystring)
     response.raise_for_status()
     data = response.json()
+
     return format_number_spaced(data["data"]["usersCount"])
 
 def write_html_file(tiktok_count, insta_count):
@@ -66,6 +69,6 @@ def write_html_file(tiktok_count, insta_count):
 </html>""")
 
 if __name__ == "__main__":
-    tiktok_followers = get_tiktok_followers_by_id(TIKTOK_USER_ID)
-    instagram_followers = get_instagram_followers_by_username(INSTAGRAM_USERNAME)
-    write_html_file(tiktok_followers, instagram_followers)
+    tiktok = get_tiktok_followers_by_id(TIKTOK_USER_ID)
+    insta = get_instagram_followers_by_url(INSTAGRAM_PROFILE_URL)
+    write_html_file(tiktok, insta)
