@@ -33,7 +33,7 @@ def write_html_file(content):
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
     body {{
       margin: 0;
-      background-color: #1c1c1c;
+      background-color: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
