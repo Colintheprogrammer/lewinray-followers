@@ -1,80 +1,74 @@
-import requests
 import os
+import requests
 from datetime import datetime
 
-# YouTube API (live)
-API_KEY = os.environ["YOUTUBE_API_KEY"]
-CHANNEL_ID = "UCTdvynmLeTfcaqc4k40b-dA"
+# --------------------
+# Helferfunktion für HTML-Zahl mit Leerzeichen
+# --------------------
+def format_number_spaced(number):
+    return "{:,}".format(int(number)).replace(",", " ")
 
-def get_youtube_subscribers():
-    url = f"https://www.googleapis.com/youtube/v3/channels?part=statistics&id={CHANNEL_ID}&key={API_KEY}"
+# --------------------
+# YouTube API-Abfrage
+# --------------------
+def get_youtube_followers(api_key, channel_id):
+    url = (
+        f"https://www.googleapis.com/youtube/v3/channels"
+        f"?part=statistics&id={channel_id}&key={api_key}"
+    )
     response = requests.get(url)
+    response.raise_for_status()
     data = response.json()
-    subs = int(data["items"][0]["statistics"]["subscriberCount"])
-    return str(subs)
+    return format_number_spaced(data["items"][0]["statistics"]["subscriberCount"])
 
-# TikTok API via RapidAPI – mit täglichem Cache
+# --------------------
+# TikTok API via RapidAPI
+# --------------------
 def get_tiktok_followers_by_id(user_id):
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    cache_file = "tiktok_cache.txt"
-
-    # 🔁 Wenn heute schon gespeichert wurde → aus Datei lesen
-    if os.path.exists(cache_file):
-        with open(cache_file, "r", encoding="utf-8") as f:
-            line = f.readline().strip()
-            if line.startswith(today):
-                return line.split(",")[1]
-
-    # 📡 Sonst von API abrufen
-    url = f"https://tiktok-scraper7.p.rapidapi.com/user/followers?user_id={user_id}&count=100&time=0"
+    url = f"https://tiktok-scraper7.p.rapidapi.com/user/followers?user_id={user_id}&count=1&time=0"
     headers = {
         "X-RapidAPI-Key": os.environ["RAPIDAPI_KEY"],
         "X-RapidAPI-Host": "tiktok-scraper7.p.rapidapi.com"
     }
     response = requests.get(url, headers=headers)
+    response.raise_for_status()
     data = response.json()
-    count = str(data["data"]["total"])
+    return format_number_spaced(data["data"]["follower_count"])
 
-    # 💾 Speichern fürs nächste Mal
-    with open(cache_file, "w", encoding="utf-8") as f:
-        f.write(f"{today},{count}")
-    return count
-
-# 🔤 HTML-Datei schreiben (nur Zahl zentriert anzeigen)
-def write_html(filename, number_only):
-    html = f"""<!DOCTYPE html>
-<html lang='de'>
-<head>
-  <meta charset='UTF-8'>
-  <style>
-    body {{
-      margin: 0;
-      padding: 0;
-      font-size: 2rem;
-      color: white;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      font-family: sans-serif;
-    }}
-  </style>
-</head>
-<body>
-  {number_only}
-</body>
-</html>"""
+# --------------------
+# HTML-Datei erstellen
+# --------------------
+def create_html(filename, formatted_number):
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{filename}</title>
+</head>
+<body style="background-color: transparent; display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <div style="font-size: 64px; font-weight: bold; color: black;">
+    {formatted_number}
+  </div>
+</body>
+</html>""")
 
-# ▶️ Start
+# --------------------
+# Hauptablauf
+# --------------------
 if __name__ == "__main__":
-    yt_subs = get_youtube_subscribers()
-    write_html("youtube.html", yt_subs)
+    youtube_api_key = os.environ["YOUTUBE_API_KEY"]
+    youtube_channel_id = "UCTdvynmLeTfcaqc4k40b-dA"  # <- Dein YT-Channel
+    tiktok_user_id = "56605052018139136"  # <- Dein TikTok-User-ID
 
-    tt_followers = get_tiktok_followers_by_id("56605052018139136")  # ← DEINE TikTok-User-ID
-    write_html("tiktok.html", tt_followers)
+    yt_followers = get_youtube_followers(youtube_api_key, youtube_channel_id)
+    tt_followers = get_tiktok_followers_by_id(tiktok_user_id)
 
-    write_html("instagram.html", "329800")  # noch statisch
-    write_html("twitch.html", "8810")       # noch statisch
+    create_html("youtube.html", yt_followers)
+    create_html("tiktok.html", tt_followers)
+
+    # Optional: Weitere Plattformen statisch
+    create_html("instagram.html", "1 200 000")
+    create_html("twitch.html", "850 000")
+
+    print("✅ Follower-Seiten aktualisiert.")
