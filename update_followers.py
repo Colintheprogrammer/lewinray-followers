@@ -7,6 +7,7 @@ RAPIDAPI_KEY = os.environ["RAPIDAPI_KEY"]
 TIKTOK_USER_ID = "56605052018139136"
 INSTAGRAM_PROFILE_URL = "https://www.instagram.com/lewinray/"
 TWITCH_USERNAME = "lewinray"
+YOUTUBE_URL = "https://www.youtube.com/@Lewinray"
 
 # === HILFSMETHODEN ===
 def format_number_spaced(number):
@@ -63,6 +64,27 @@ def write_twitch_html(follower_count):
     with open("twitch.html", "w", encoding="utf-8") as f:
         f.write(build_html(follower_count, "Twitch Followers"))
 
+# === YOUTUBE ===
+def get_youtube_subscribers(channel_url):
+    url = "https://youtube138.p.rapidapi.com/channel/details/"
+    headers = {
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": "youtube138.p.rapidapi.com"
+    }
+    params = {
+        "id": channel_url,
+        "hl": "en",
+        "gl": "US"
+    }
+    response = requests.get(url, headers=headers, params=params)
+    response.raise_for_status()
+    data = response.json()
+    return format_number_spaced(data["stats"]["subscribers"])
+
+def write_youtube_html(subscriber_count):
+    with open("youtube.html", "w", encoding="utf-8") as f:
+        f.write(build_html(subscriber_count, "YouTube Subscribers"))
+
 # === HTML TEMPLATE ===
 def build_html(content, title):
     return f"""<!DOCTYPE html>
@@ -98,9 +120,11 @@ if __name__ == "__main__":
     tt_followers = get_tiktok_followers(TIKTOK_USER_ID)
     insta_followers = get_instagram_followers(INSTAGRAM_PROFILE_URL)
     twitch_followers = get_twitch_followers(TWITCH_USERNAME)
+    yt_subscribers = get_youtube_subscribers(YOUTUBE_URL)
 
     write_tiktok_html(tt_followers)
     write_instagram_html(insta_followers)
     write_twitch_html(twitch_followers)
+    write_youtube_html(yt_subscribers)
 
-    print("HTML-Dateien für TikTok, Instagram und Twitch wurden erstellt.")
+    print("HTML-Dateien für TikTok, Instagram, Twitch und YouTube wurden erstellt.")
