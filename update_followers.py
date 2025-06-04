@@ -19,7 +19,8 @@ def get_tiktok_followers_by_id(user_id: str) -> int:
     data = response.json()
 
     # Zugriff auf den ersten Follower-Eintrag
-    return data["user"]["stats"]["followerCount"]
+    return format_number_spaced(data["data"]["user"]["stats"]["followerCount"])
+
 
 if __name__ == "__main__":
     tiktok_user_id = "56605052018139136"  # Deine TikTok User ID
