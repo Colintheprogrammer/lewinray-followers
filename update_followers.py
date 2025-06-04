@@ -13,7 +13,7 @@ def get_tiktok_followers_by_id(user_id):
     }
     response = requests.get(url, headers=headers)
     data = response.json()
-    return format_number_spaced(data["user"]["stats"]["followerCount"])
+    return format_number_spaced(data["stats"]["followerCount"])
 
 def write_html_file(content):
     html = f"""<!DOCTYPE html>
