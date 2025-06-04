@@ -2,18 +2,25 @@ import os
 import requests
 from datetime import datetime
 
+TIKTOK_USER_ID = "56605052018139136"
+RAPIDAPI_KEY = os.environ["RAPIDAPI_KEY"]
+
 def format_number_spaced(number):
-    return f"{number:,}".replace(",", " ")
+    return "{:,}".format(number).replace(",", " ")
 
 def get_tiktok_followers_by_id(user_id):
-    url = f"https://tiktok-scraper7.p.rapidapi.com/user/detail?user_id={user_id}"
+    url = "https://tiktok-scraper7.p.rapidapi.com/user/detail"
+    querystring = {"user_id": user_id}
     headers = {
-        "X-RapidAPI-Key": os.environ["RAPIDAPI_KEY"],
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
         "X-RapidAPI-Host": "tiktok-scraper7.p.rapidapi.com"
     }
-    response = requests.get(url, headers=headers)
+
+    response = requests.get(url, headers=headers, params=querystring)
+    response.raise_for_status()
     data = response.json()
-    return format_number_spaced(data["stats"]["followerCount"])
+
+    return format_number_spaced(data["data"]["stats"]["followerCount"])
 
 def write_html_file(content):
     html = f"""<!DOCTYPE html>
@@ -41,12 +48,10 @@ def write_html_file(content):
 <body>
     <div class="followers">{content}</div>
 </body>
-</html>
-"""
+</html>"""
     with open("tiktok.html", "w", encoding="utf-8") as f:
         f.write(html)
 
 if __name__ == "__main__":
-    tiktok_user_id = "56605052018139136"  # Deine TikTok-User-ID
-    tt_followers = get_tiktok_followers_by_id(tiktok_user_id)
-    write_html_file(tt_followers)
+    formatted_followers = get_tiktok_followers_by_id(TIKTOK_USER_ID)
+    write_html_file(formatted_followers)
